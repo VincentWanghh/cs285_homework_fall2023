@@ -39,7 +39,7 @@ class LoadedGaussianPolicy(BasePolicy, nn.Module):
             self.non_lin = nn.Tanh()
         else:
             raise NotImplementedError()
-        policy_type = [k for k in data.keys() if k != 'nonlin_type'][0]
+        policy_type = [k for k in data.keys() if k != 'nonlin_type'][0]#从 data 字典中获取除 'nonlin_type' 以外的第一个键
 
         assert policy_type == 'GaussianPolicy', (
             'Policy type {} not supported'.format(policy_type)
