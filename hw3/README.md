@@ -65,9 +65,9 @@ Early in training, eval return is more stable and higher than train return. This
 -   ![eval3](result_picture/eval3.png)
     ![qvalue3](result_picture/qvalue3.png)
  (Halfcheetah)
-Orange: num_critic_updates->1, num_action_samples->1
-Blue: num_critic_updates->10, num_action_samples->1
-Red: num_critic_updates->1, num_action_samples->10
+Orange: num_critic_updates->1, num_action_samples->1  
+Blue: num_critic_updates->10, num_action_samples->1  
+Red: num_critic_updates->1, num_action_samples->10  
 Both eval_return and qValues are the highest in orange curve.
 
  -  ![human_sac](result_picture/human_sac.png)
@@ -79,9 +79,8 @@ Both eval_return and qValues are the highest in orange curve.
 -   ![pg_evalreturn](result_picture/pg_evalreturn.png)
     ![rep_evalreturn](result_picture/rep_evalreturn.png)
     ![rep_qvalues](result_picture/rep_qvalues.png)
-    Orange: Policy Gradient
-    Blue: Reparametrize(mean q values)
-    Red: Reparametrize(min q values)
+    Orange: Policy Gradient  
+    Blue: Reparametrize(mean q values)  
+    Red: Reparametrize(min q values)  
     Obviously the performance of the Red curve is much much much better than the others!!!!
     Off-policy algorithm is more effective than on-policy algorithm. In terms of time consuming, off-policy took about 25h while on-policy took about 120h on my laptop.
-    
