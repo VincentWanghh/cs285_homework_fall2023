@@ -84,3 +84,4 @@ Both eval_return and qValues are the highest in orange curve.
     Red: Reparametrize(min q values)
     Obviously the performance of the Red curve is much much much better than the others!!!!
     Off-policy algorithm is more effective than on-policy algorithm. In terms of time consuming, off-policy took about 25h while on-policy took about 120h on my laptop.
+    
