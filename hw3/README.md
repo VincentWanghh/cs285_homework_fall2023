@@ -59,9 +59,11 @@ Early in training, eval return is more stable and higher than train return. This
 
   ### 3.1.4 Actor with REPARAMETRIZE
 -  ![IP_REPvsREIN](result_picture/IP_REPvsREIN.png)
-(Inverted Pendulum)Both REPARAMETRIZE(blue) and REINFORCE(orange) achieve similar reward and REPARAMETRIZE performs better.
+(Inverted Pendulum)  
+Both REPARAMETRIZE(blue) and REINFORCE(orange) achieve similar reward and REPARAMETRIZE performs better.
  -  ![REPvsREIN1vs10](result_picture/REPvsREIN1vs10.png)
- (Halfcheetah)reparametrize(red) has the best performance compared with reinforcement1(orange) and reinforcement10(blue).
+ (Halfcheetah)  
+ reparametrize(red) has the best performance compared with reinforcement1(orange) and reinforcement10(blue).
 -   ![eval3](result_picture/eval3.png)
     ![qvalue3](result_picture/qvalue3.png)
  (Halfcheetah)
@@ -75,7 +77,8 @@ Both eval_return and qValues are the highest in orange curve.
    ### 3.1.5 Stabilizing Target Values
 -   ![QQQreturn](result_picture/QQQreturn.png)
  ![QQQvalue](result_picture/QQQvalue.png)
-(Hopper)clipQ(red) has the best performance and lowest q_values, which means clipq's Q-values has the most accurate estimation. The single-Q(orange)'s performance is the worst, and the most overestimated q-values. doubleQ(blue)'s perforance is medium.
+(Hopper)  
+clipQ(red) has the best performance and lowest q_values, which means clipq's Q-values has the most accurate estimation. The single-Q(orange)'s performance is the worst, and the most overestimated q-values. doubleQ(blue)'s perforance is medium.
 -   ![pg_evalreturn](result_picture/pg_evalreturn.png)
     ![rep_evalreturn](result_picture/rep_evalreturn.png)
     ![rep_qvalues](result_picture/rep_qvalues.png)
