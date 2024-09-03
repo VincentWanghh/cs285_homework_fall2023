@@ -235,7 +235,7 @@ class MemoryEfficientReplayBuffer:
 
         assert (
             next_observation.ndim == 2
-        ), "Single-frame observation should have dimensions (H, W)"
+        ), "Single-frame observation should have dimensions (H, W), but we got {} and its shape{}".format(next_observation.ndim, next_observation.shape)
         assert next_observation.dtype == np.uint8, "Observation should be uint8 (0-255)"
 
         if self.actions is None:

@@ -15,6 +15,6 @@ soft_target_update_rate: 0.005
 
 actor_gradient_type: reparametrize
 num_critic_updates: 1
-
+num_actor_samples: 10
 use_entropy_bonus: true
 temperature: 0.1
