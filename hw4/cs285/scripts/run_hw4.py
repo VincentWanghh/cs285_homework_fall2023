@@ -44,9 +44,16 @@ def collect_mbpo_rollout(
         # HINT: get actions from `sac_agent` and `next_ob` predictions from `mb_agent`.
         # Average the ensemble predictions directly to get the next observation.
         # Get the reward using `env.get_reward`.
-
+        ac = sac_agent.get_action(ob)
+        next_ob = np.stack([mb_agent.get_dynamics_predictions(i, ob, ac) for i in range(mb_agent.ensemble_size)])
+        next_ob = np.mean(next_ob, axis=0)
+        assert ob.ndim == 1, ob.shape
+        assert ac.ndim == 1, ac.shape
         obs.append(ob)
         acs.append(ac)
+        rew = env.get_reward(next_ob, ac)[0]
+        assert rew.ndim == 1, rew.shape
+        assert next_ob.ndim == 1, next_ob.shape
         rewards.append(rew)
         next_obs.append(next_ob)
         dones.append(False)
@@ -165,6 +172,10 @@ def run_training_loop(
             # TODO(student): train the dynamics models
             # HINT: train each dynamics model in the ensemble with a *different* batch of transitions!
             # Use `replay_buffer.sample` with config["train_batch_size"].
+            for i in range(mb_agent.ensemble_size):
+                sampled_batch = replay_buffer.sample(config["train_batch_size"])
+                loss = mb_agent.update(i, sampled_batch["observations"], sampled_batch["actions"], sampled_batch["next_observations"])
+                step_losses.append(loss)
             all_losses.append(np.mean(step_losses))
 
         # on iteration 0, plot the full learning curve
