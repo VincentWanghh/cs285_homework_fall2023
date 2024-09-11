@@ -169,15 +169,14 @@ class ModelBasedAgent(nn.Module):
         )
         # We need to repeat our starting obs for each of the rollouts.
         obs = np.tile(obs, (self.ensemble_size, self.mpc_num_action_sequences, 1)) # shape = (ensemble_size, mpc_num_action_sequences, ob_dim)
-
         # TODO(student): for each batch of actions in in the horizon...
         for acs in action_sequences.transpose(1, 0, 2):
             assert acs.shape == (self.mpc_num_action_sequences, self.ac_dim)
             assert obs.shape == (
                 self.ensemble_size,
                 self.mpc_num_action_sequences,
-                self.ob_dim,
-            )
+                self.ob_dim
+            ),obs.shape
 
             # TODO(student): predict the next_obs for each rollout
             # HINT: use self.get_dynamics_predictions
@@ -195,8 +194,8 @@ class ModelBasedAgent(nn.Module):
             # ignore `dones`. You might want to do some reshaping to make
             # `next_obs` and `acs` 2-dimensional.
             acs = np.tile(acs, (self.ensemble_size,1)).reshape(-1, self.ac_dim) # shape = (ensemble_size * mpc_num_action_sequences, ac_dim)
-            next_obs = next_obs.reshape(-1, self.ob_dim) # shape = (ensemble_size * mpc_num_action_sequences, ob_dim)
-            rewards = self.env.get_reward(next_obs, acs)[0].squeeze() # shape = (ensemble_size * mpc_num_action_sequences,)
+            # next_obs = next_obs.reshape(-1, self.ob_dim) # shape = (ensemble_size * mpc_num_action_sequences, ob_dim)
+            rewards = self.env.get_reward(next_obs.reshape(-1, self.ob_dim), acs)[0].squeeze() # shape = (ensemble_size * mpc_num_action_sequences,)
             rewards = rewards.reshape(self.ensemble_size, -1)
             assert rewards.shape == (self.ensemble_size, self.mpc_num_action_sequences)
 

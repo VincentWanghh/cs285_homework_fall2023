@@ -33,7 +33,7 @@ def sample_trajectory(
             if hasattr(env, "sim"):
                 img = env.sim.render(camera_name="track", height=500, width=500)[::-1]
             else:
-                img = env.render(mode="rgb_array")
+                img = env.render(render_mode="rgb_array")
 
             if isinstance(img, list):
                 img = img[0]
