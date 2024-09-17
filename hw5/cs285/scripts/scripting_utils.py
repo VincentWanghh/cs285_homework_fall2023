@@ -20,7 +20,7 @@ def make_logger(logdir_prefix: str, config: dict) -> Logger:
         os.makedirs(data_path)
     
     logdir = (
-        logdir_prefix + config["log_name"] + "_" + time.strftime("%d-%m-%Y_%H-%M-%S")
+        logdir_prefix + config["log_name"] + "_"+ config["dataset_name"] + "_" + time.strftime("%d-%m-%Y_%H-%M-%S")
     )
     logdir = os.path.join(data_path, logdir)
     if not (os.path.exists(logdir)):

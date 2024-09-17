@@ -1,7 +1,9 @@
 import pickle
 import time
 import argparse
-
+import sys
+#print(sys.path)
+sys.path.append("/media/junhan/File2/cs285_homework_fall2023/hw5")
 from cs285.agents.dqn_agent import DQNAgent
 import cs285.env_configs
 from cs285.envs import Pointmass
@@ -31,6 +33,7 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     ptu.init_gpu(use_gpu=not args.no_gpu, gpu_id=args.which_gpu)
+    print(f"seed is {args.seed}")
 
     # make the gym environment
     env = config["make_env"]()
@@ -67,16 +70,20 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
             step,
         )
 
-        if step % args.log_interval == 0:
+        if step % args.log_interval == 0: # default = 1
             for k, v in metrics.items():
+                if isinstance(v,tuple):
+                    print(k)
+                    print(v)
+                    raise AssertionError
                 logger.log_scalar(v, k, step)
         
-        if step % args.eval_interval == 0:
+        if step % args.eval_interval == 0: # default=10000
             # Evaluate
             trajectories = utils.sample_n_trajectories(
                 env,
                 agent,
-                args.num_eval_trajectories,
+                args.num_eval_trajectories, # default = 10
                 ep_len,
             )
             returns = [t["episode_statistics"]["r"] for t in trajectories]

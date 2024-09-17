@@ -399,10 +399,10 @@ class Pointmass(gym.Env):
         return np.array([obs[0] * float(self._height), obs[1] * float(self._width)])
 
     def _is_blocked(self, state):
-        if not self.observation_space.contains(state):
+        if not self.observation_space.contains(state):  # 超出边界
             return True
         (i, j) = self._discretize_state(state)
-        return self._walls[i, j] == 1
+        return self._walls[i, j] == 1 # 撞墙
 
     def step(self, action):
         self.timesteps_left -= 1

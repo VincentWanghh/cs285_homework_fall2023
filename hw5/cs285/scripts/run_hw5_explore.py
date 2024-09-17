@@ -1,7 +1,9 @@
 import time
 import argparse
 import pickle
-
+import sys
+#print(sys.path)
+sys.path.append("/media/junhan/File2/cs285_homework_fall2023/hw5")
 from cs285.agents import agents as agent_types
 from cs285.envs import Pointmass
 
@@ -94,7 +96,7 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
 
         truncated = info.get("TimeLimit.truncated", False)
 
-        replay_buffer.insert(
+        replay_buffer.insert( # just insert one transition (s_t(o_t), a_t, r_t, s_{t+1}(o_{t+1}))
             observation=observation,
             action=action,
             reward=reward,

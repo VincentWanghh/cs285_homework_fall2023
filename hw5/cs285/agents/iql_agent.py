@@ -38,7 +38,11 @@ class IQLAgent(AWACAgent):
         action_dist: Optional[torch.distributions.Categorical] = None,
     ):
         # TODO(student): Compute advantage with IQL
-        return ...
+        qa_values = self.critic(observations)
+        state_values = self.value_critic(observations)
+        q_values = torch.gather(qa_values, -1, torch.unsqueeze(actions, 1))
+        advantages = q_values - state_values
+        return advantages
 
     def update_q(
         self,
@@ -52,7 +56,12 @@ class IQLAgent(AWACAgent):
         Update Q(s, a)
         """
         # TODO(student): Update Q(s, a) to match targets (based on V)
-        loss = ...
+        state_values = self.value_critic(next_observations).squeeze()
+        target_values = rewards + self.discount * (1 - dones.int()) * state_values
+        qa_values = self.critic(observations)
+        q_values = torch.gather(qa_values, -1, torch.unsqueeze(actions,1)).squeeze()
+        assert q_values.shape == target_values.shape, print(f"q_values.shape={q_values.shape}, target_values.shape={target_values.shape}")
+        loss = self.critic_loss(q_values, target_values)
 
         self.critic_optimizer.zero_grad()
         loss.backward()
@@ -62,7 +71,7 @@ class IQLAgent(AWACAgent):
         self.critic_optimizer.step()
 
         metrics = {
-            "q_loss": self.critic_loss(q_values, target_values).item(),
+            "q_loss": loss.item(),
             "q_values": q_values.mean().item(),
             "target_values": target_values.mean().item(),
             "q_grad_norm": grad_norm.item(),
@@ -78,7 +87,11 @@ class IQLAgent(AWACAgent):
         Compute the expectile loss for IQL
         """
         # TODO(student): Compute the expectile loss
-        return ...
+        diff = target_qs - vs
+        weight = torch.where(diff < 0, 1 - expectile, expectile)
+        loss = weight * torch.square(diff)
+
+        return loss.mean()
 
     def update_v(
         self,
@@ -89,9 +102,12 @@ class IQLAgent(AWACAgent):
         Update the value network V(s) using targets Q(s, a)
         """
         # TODO(student): Compute target values for V(s)
-
+        vs = self.value_critic(observations)
+        qa_values = self.critic(observations)
+        target_values = torch.gather(qa_values, -1, torch.unsqueeze(actions,1))
+        assert vs.shape == target_values.shape, print(f"vs.shape={vs.shape}, target_values.shape={target_values.shape}")
         # TODO(student): Update V(s) using the loss from the IQL paper
-        loss = ...
+        loss = self.iql_expectile_loss(self.expectile, vs, target_values)
 
         self.value_critic_optimizer.zero_grad()
         loss.backward()
@@ -135,8 +151,10 @@ class IQLAgent(AWACAgent):
         step: int,
     ):
         metrics = self.update_critic(observations, actions, rewards, next_observations, dones)
-        metrics["actor_loss"] = self.update_actor(observations, actions)
-
+        actor_loss, advantages, actor_grad_norm = self.update_actor(observations, actions)
+        metrics["actor_loss"] = actor_loss
+        metrics["actor_advantage"] = advantages
+        metrics["actor_grad_norm"] = actor_grad_norm
         if step % self.target_update_period == 0:
             self.update_target_critic()
             self.update_target_value_critic()

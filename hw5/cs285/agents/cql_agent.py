@@ -39,9 +39,17 @@ class CQLAgent(DQNAgent):
             next_obs,
             done,
         )
-
+        # CQL惩罚对非最优动作的学习，
+        # 也就是说对于一个给定的状态s_t, 如果网络生成的所有q(s_t, a_t）都彼此相差不大，
+        # 这说明我在进行argmax操作选择最优动作时有很大的误差(有可能因为critic网络的预测误差选择了q值最大的“最优”动作， 而错过了实际上的最优动作)
+        # 此时通过引入penalty增大loss，促使网络预测结果发生大改变。
+        # 而当对于一个给定的状态s_t, 如果网络生成的所有q(s_t, a_t）有明显的最大值（也就是说有一个a_t的q值远远大于其他所有a_t的q值），
+        # 这说明在进行argmax操作选择最优动作时误差较小， penalty也随之降低  
         # TODO(student): modify the loss to implement CQL
         # Hint: `variables` includes qa_values and q_values from your CQL implementation
-        loss = loss + ...
-
+        qa_values = variables["qa_values"]
+        q_values = variables["q_values"]# q_values.shape = (batch_size, action_size)
+        penalty = torch.log(torch.exp(qa_values / self.cql_temperature).sum(dim=-1)) # shape = (batch_size,)
+        loss = loss + self.cql_alpha * (penalty - q_values).mean()
+        metrics["critic_loss"] = loss.item()
         return loss, metrics, variables
