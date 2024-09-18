@@ -1,12 +1,11 @@
-base_config: "cql"
+base_config: "awac"
 env_name: "PointmassHard-v0"
-exp_name: "pointmass_hard_cql"
+exp_name: "pointmass_hard_awac"
 use_double_q: true
 total_steps: 200000
 offline_steps: 100000
 dataset_name: "50k_pointmass_hard_rnd"
-
-cql_alpha: 1.0
+temperature: 10.0
 
 hidden_size: 64
 num_layers: 2

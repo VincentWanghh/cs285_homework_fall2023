@@ -2,7 +2,7 @@ base_config: "awac"
 env_name: "PointmassHard-v0"
 exp_name: "pointmass_hard_dqn"
 training_steps: 200000
-dataset_name: "10k_pointmass_hard_rnd"
+dataset_name: "200k_pointmass_hard_rnd"
 
 temperature: 10.0
 
