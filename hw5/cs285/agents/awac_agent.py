@@ -1,8 +1,9 @@
 from typing import Callable, Optional, Sequence, Tuple, List
 import torch
 from torch import nn
+import numpy as np
 
-
+from cs285.infrastructure import pytorch_util as ptu
 from cs285.agents.dqn_agent import DQNAgent
 
 
@@ -22,6 +23,19 @@ class AWACAgent(DQNAgent):
         self.actor = make_actor(observation_shape, num_actions) # num_per_action = 5,
         self.actor_optimizer = make_actor_optimizer(self.actor.parameters())
         self.temperature = temperature
+
+    @torch.no_grad()
+    def get_action(self, observation: np.ndarray, epsilon: float = 0.0) -> int:
+        """
+        Used for evaluation.
+        """
+        observation = ptu.from_numpy(np.asarray(observation))[None]
+
+        dist = self.actor(observation)
+        action = dist.sample()
+
+        return ptu.to_numpy(action).squeeze(0).item()
+    
 
     def compute_critic_loss(
         self,
