@@ -1,3 +1,4 @@
+from __future__ import annotations
 from cs285.infrastructure.utils import *
 
 
@@ -10,6 +11,37 @@ class ReplayBuffer:
         self.rewards = None
         self.next_observations = None
         self.dones = None
+
+    def load(self, dumped:ReplayBuffer):
+        """Initialize from dumped replay buffer"""
+        data_size = dumped.size
+        if self.size != 0 or self.max_size < data_size:
+            raise ValueError('This replay buffer is not empty or big enough!')
+        
+        # initialize the replay buffer
+        data = dumped.sample(1)
+        observation = data['observations'][0]
+        action = data['actions'][0]
+        reward = data['rewards'][0]
+        next_observation = data['next_observations'][0]
+        done = data['dones'][0]
+        self.observations = np.empty(
+            (self.max_size, *observation.shape), dtype=observation.dtype
+        )
+        self.actions = np.empty((self.max_size, *action.shape), dtype=action.dtype)
+        self.rewards = np.empty((self.max_size, *reward.shape), dtype=reward.dtype)
+        self.next_observations = np.empty(
+            (self.max_size, *next_observation.shape), dtype=next_observation.dtype
+        )
+        self.dones = np.empty((self.max_size, *done.shape), dtype=done.dtype)
+
+        #load data from dumped to replay buffer
+        self.observations[:data_size] = dumped.observations
+        self.actions[:data_size] = dumped.actions
+        self.rewards[:data_size] = dumped.rewards
+        self.next_observations[:data_size] = dumped.next_observations
+        self.dones[:data_size] = dumped.dones
+        self.size = data_size
 
     def sample(self, batch_size):
         rand_indices = np.random.randint(0, self.size, size=(batch_size,)) % self.max_size

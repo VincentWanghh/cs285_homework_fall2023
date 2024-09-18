@@ -14,7 +14,7 @@ def make_config(config_file: str) -> dict:
     return cs285.env_configs.configs[base_config_name](**config_kwargs)
 
 def make_logger(logdir_prefix: str, config: dict) -> Logger:
-    data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data")
+    data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/finetuning")
 
     if not (os.path.exists(data_path)):
         os.makedirs(data_path)
