@@ -47,7 +47,6 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
     )
 
     ep_len = env.spec.max_episode_steps or env.max_episode_steps
-
     observation = None
 
     # Replay buffer
@@ -55,16 +54,31 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
     with open(os.path.join(args.dataset_dir, f"{config['dataset_name']}.pkl"), "rb") as f:
         dataset = pickle.load(f)
     replay_buffer.load(dataset)
+
     observation = env.reset()
-
     recent_observations = []
-
     num_offline_steps = config["offline_steps"]
     # num_online_steps = config["total_steps"] - num_offline_steps
     epsilon = None
     for step in tqdm.trange(config["total_steps"], dynamic_ncols=True):
         # TODO(student): Borrow code from another online training script here. Only run the online training loop after `num_offline_steps` steps.
-        if step >= num_offline_steps:
+        if step == num_offline_steps:
+            replay_buffer = ReplayBuffer(capacity=config["total_steps"])
+            epsilon = exploration_schedule.value(step)
+            while True:
+                with torch.no_grad():
+                    action = agent.get_action(observation, epsilon)
+                next_observation, reward, done, info = env.step(action)
+                truncated = info.get("TimeLimit.truncated", False)
+                replay_buffer.insert(observation, action, reward, next_observation, done and not truncated)
+                recent_observations.append(observation)
+                if done:
+                    observation = env.reset()
+                else:
+                    observation = next_observation
+                if replay_buffer.size >= config["batch_size"]:
+                    break
+        if step > num_offline_steps:
             epsilon = exploration_schedule.value(step)
             with torch.no_grad():
                 action = agent.get_action(observation, epsilon)
@@ -83,11 +97,10 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
 
         # Convert to PyTorch tensors
         batch = ptu.from_numpy(batch)
-
         update_info = agent.update(
             batch["observations"],
             batch["actions"],
-            batch["rewards"] * (1 if config.get("use_reward", False) else 0),
+            batch["rewards"],
             batch["next_observations"],
             batch["dones"],
             step,
@@ -136,18 +149,17 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
             )
 
     # Save the final dataset
-    dataset_file = os.path.join(args.dataset_dir, "finetuning_add_online_data/", f"{config['dataset_name']}_finetuning_add_online_data.pkl")
-    with open(dataset_file, "wb") as f:
-        pickle.dump(replay_buffer, f)
-        print("Saved dataset to", dataset_file)
+    # dataset_file = os.path.join(args.dataset_dir, "finetuning_add_online_data/", f"{config['dataset_name']}_finetuning_add_online_data.pkl")
+    # with open(dataset_file, "wb") as f:
+    #     pickle.dump(replay_buffer, f)
+    #     print("Saved dataset to", dataset_file)
 
     # Render final heatmap
     fig = visualize(
         env_pointmass, agent, replay_buffer.observations[: config["total_steps"]]
     )
     fig.suptitle("State coverage")
-
-    filename = os.path.join("exploration_visualization/finetuning",f"{config['log_name']}-{time.strftime('%Y%m%d-%H%M%S', time.localtime())}.png")
+    filename = os.path.join("exploration_visualization/finetuning",f"{config['dataset_name']}-{config['log_name']}-{time.strftime('%Y%m%d-%H%M%S', time.localtime())}.png")
     fig.savefig(filename)
     print("Saved final heatmap to", filename)
 
