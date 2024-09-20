@@ -3,9 +3,9 @@ env_name: "PointmassHard-v0"
 exp_name: "pointmass_hard_cql"
 use_double_q: true
 training_steps: 200000
-dataset_name: "pointmass_hard_rnd"
+dataset_name: "10k_pointmass_hard_rnd"
 
-cql_alpha: 0.1
+cql_alpha: 0.2
 
 hidden_size: 64
 num_layers: 2
